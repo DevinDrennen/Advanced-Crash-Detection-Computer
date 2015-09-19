@@ -26,7 +26,6 @@ D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control
 D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control\bin\Debug\SecretLabs.NETMF.Hardware.pdb
 D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control\bin\Debug\SecretLabs.NETMF.Hardware.Netduino.pdb
 D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control\bin\Debug\GoBus.pdb
-D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control\obj\Debug\TinyCLR_DebugReferences.cache
 D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control\obj\Debug\be\ACDC-Control.pe
 D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control\obj\Debug\be\ACDC-Control.pdbx
 D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control\obj\Debug\le\ACDC-Control.pe
@@ -39,4 +38,3 @@ D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control
 D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control\bin\Debug\BE\NetduinoGo.RgbLed.pdbx
 D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control\bin\Debug\NetduinoGo.RgbLed.dll
 D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control\bin\Debug\NetduinoGo.RgbLed.pdb
-D:\Users\Omar\Github\Advanced-Crash-Detection-Computer\ACDC-Control\ACDC-Control\obj\Debug\ACDC-Control.csprojResolveAssemblyReference.cache
