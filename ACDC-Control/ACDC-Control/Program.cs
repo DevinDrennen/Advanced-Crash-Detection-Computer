@@ -14,7 +14,7 @@ namespace ACDC_Control
         {
             NetworkInterface wifi = Microsoft.SPOT.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0];
             // Lets keep the button for reseting for now... 
-            //InputPort buttonInput = new InputPort(Pins.ONBOARD_BTN, true, Port.ResistorMode.PullDown);
+            InputPort buttonInput = new InputPort(Pins.ONBOARD_BTN, true, Port.ResistorMode.PullDown);
             RazorIMU imu = new RazorIMU(SerialPorts.COM1);
             OutputPort activityLED = new OutputPort(Pins.ONBOARD_LED, false);
             RgbLed lightOutput = new RgbLed();
@@ -29,6 +29,8 @@ namespace ACDC_Control
                 //Debug.Print("Waiting for IP...");
                 //Debug.Print("Razor IMU Initiated: " + imu.Initilized);
                 activityLED.Write(!activityLED.Read());
+                if (buttonInput.Read())
+                    imu.InitializeDataStream();
                 Thread.Sleep(1000);
             }
 
