@@ -89,6 +89,7 @@ void output_sensors_text(char raw_or_calibrated)
 
 void output_sensors_binary()
 {
+  Serial.write(separator, 4);
   Serial.write((byte*) accel, 12);
   Serial.write((byte*) magnetom, 12);
   Serial.write((byte*) gyro, 12);
