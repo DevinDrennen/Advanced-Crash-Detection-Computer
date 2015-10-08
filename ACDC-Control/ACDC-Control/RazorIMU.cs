@@ -1,9 +1,4 @@
-using Microsoft.SPOT;
-using Microsoft.SPOT.Hardware;
-using SecretLabs.NETMF.Hardware.Netduino;
-using System;
-using System.IO.Ports;
-using System.Text;
+ using System.IO.Ports;
 using System.Threading;
 
 namespace ACDC_Control.IMU
@@ -15,14 +10,14 @@ namespace ACDC_Control.IMU
     /// </summary>
     public class RazorIMU
     {
+        const int BYTES_PER_FLOAT = 4, FLOATS_PER_TRANS = 9;
+
         public event DataConverted DataProcessed = delegate { };
         private SerialPort razorIMU;
         private Thread serialReadThread;
 
-        private byte[] syncByteArray, syncOKByteArray, syncOKBuffer;
         private byte[][] dataBytes;
-
-        const int BYTES_PER_FLOAT = 4, FLOATS_PER_TRANS = 9, TRANS_SIZE = BYTES_PER_FLOAT * FLOATS_PER_TRANS;
+        private byte[] syncBytes;
         private float[] data;
 
         /// <summary>
@@ -47,14 +42,9 @@ namespace ACDC_Control.IMU
         /// <param name="baudRate">Baud rate sensor is set up to use. Default set.</param>
         public RazorIMU(string port, int baudRate = 57600)
         {
-            // Define SYNC related byte arrays, create port, and data arrays
-            syncByteArray = Encoding.UTF8.GetBytes("#s12");
-            syncOKByteArray = Encoding.UTF8.GetBytes("#SYNCH12\r\n");
-            syncOKBuffer = new byte[syncOKByteArray.Length];
-
             razorIMU = new SerialPort(port, baudRate);
+            syncBytes = new byte[] { 127, 128, 0, 0 };
             data = new float[FLOATS_PER_TRANS];
-
             dataBytes = new byte[FLOATS_PER_TRANS][];
 
             for (int i = 0; i < FLOATS_PER_TRANS; i++)
@@ -62,15 +52,11 @@ namespace ACDC_Control.IMU
         }
 
         /// <summary>
-        /// Reset the binary data stream to the start.
+        /// Begin reading serial data from the sensor.
         /// </summary>
-        /// <returns>True if initiated correctly, false otherwise.</returns>
-        public bool InitializeDataStream()
+        /// <returns>True if initialized correctly, false otherwise.</returns>
+        public bool StartReading()
         {
-            int nextByte = 0;
-            int bytesRead = 0;
-            Initilized = false;
-
             // If the stream reader is alive, stop it!
             if (serialReadThread != null && serialReadThread.IsAlive)
                 serialReadThread.Abort();
@@ -79,35 +65,7 @@ namespace ACDC_Control.IMU
             if(!razorIMU.IsOpen)
                 razorIMU.Open();
 
-            // Send sync signal
-            razorIMU.Write(syncByteArray, 0, syncByteArray.Length); 
-
-            // Wait for # part of the sync response signal
-            while (nextByte != '#')
-            {
-                // Lets not wait forever, 
-                // after a full frame, its time to stop and report an error.
-                if (bytesRead == 72) 
-                    break;
-
-                // Read in the next byte and increase how many have been read.
-                nextByte = razorIMU.ReadByte();
-                bytesRead++;
-            }
-
-            // Validate sync signal a byte at a time, if fails report problem.
-            for (int i = 1; i < syncOKByteArray.Length; i++)
-            {
-                nextByte = razorIMU.ReadByte();
-                if (nextByte != syncOKByteArray[i])
-                {
-                    // Close port, and return a fail
-                    razorIMU.Close();
-                    return false;
-                }
-            }
-
-            // On success initialize stream reader and set state to initialized
+            // Initialize stream reader and set state to initialized
             serialReadThread = new Thread(new ThreadStart(readStream));
             serialReadThread.Start();
             Initilized = true;
@@ -120,39 +78,69 @@ namespace ACDC_Control.IMU
         /// </summary>
         private void readStream()
         {
-            // Variables to keep track of place in array to store data.
-            int floatIndex = 0, byteIndex = 0, nextByte;
+            // Variables to keep track of data and data location in the byte array
+            int  nextByte = -1, byteIndex = 0, floatIndex = 0;
+            bool synced = false;
 
             // As long as the serial port is open
-            while(razorIMU.IsOpen)
+            while (razorIMU.IsOpen)
             {
-                // Read the next byte
-                nextByte = razorIMU.ReadByte();
+                // Reset the indecies
+                byteIndex = 0;
+                floatIndex = 0;
+                synced = false;
 
-                // If its not -1 (timeout, no byte to read)
-                if (nextByte != -1)
+                // We wait until we're synced with the next set of values before proceeding
+                while (!synced)
                 {
-                    // Store it in the next place of the 2D jagged array,
-                    dataBytes[floatIndex][byteIndex] = (byte)nextByte;
-                    byteIndex++; // then increase the 2nd dimension (bytes) index.
+                    // Wait for the first value of the sync signal (128)
+                    while (nextByte != syncBytes[0])
+                        nextByte = razorIMU.ReadByte();
 
-                    // If the (4) bytes have been put in place, for the current float, 
-                    
-                    if (byteIndex == BYTES_PER_FLOAT)
+                    // Check the following values to ensure it is the sync signal
+                    for (int i = 1; i < syncBytes.Length; i++)
                     {
-                        // then reset the 2nd dimension (byte) index and increase the 1st dimension (float) index
-                        byteIndex = 0;
-                        floatIndex++;
-
-                        // If all the float's bytes have been filled in,
-                        if (floatIndex == FLOATS_PER_TRANS)
+                        nextByte = razorIMU.ReadByte();
+                        // If any of the values isn't right, fail sync and keep trying.
+                        if (nextByte != syncBytes[i])
                         {
-                            // then reset the 1st dimension (float) index and convert the data.
-                            floatIndex = 0;
-                            convertData();
+                            synced = false;
+                            break;
                         }
+
+                        synced = true;
                     }
                 }
+
+                /* This algorithm fills a 2d array of bytes by filling 9 rows of 4 bytes
+                 * In other words, it is grouped such that each row contains the 4 bytes for a given float.
+                */
+
+                // While there are more rows to fill...
+                while(floatIndex < FLOATS_PER_TRANS)
+                {
+                    // While there are more cells within this row to fill...
+                    while (byteIndex < BYTES_PER_FLOAT)
+                    {
+                        // Read the nect byte
+                        nextByte = razorIMU.ReadByte();
+
+                        // If read was successful
+                        if (nextByte != -1)
+                        {
+                            // Store the byte in this cell, and increase to the next cell in this row.
+                            dataBytes[floatIndex][byteIndex] = (byte)nextByte;
+                            byteIndex++;
+                        }
+                    }
+
+                    // Row filled, increase floatIndex to next row and reset the cell to 0 again
+                    byteIndex = 0;
+                    floatIndex++;
+                }
+
+                // Grid filled, convert bytes to floats!
+                convertData();
             }
         }
 
@@ -161,23 +149,28 @@ namespace ACDC_Control.IMU
         /// </summary>
         private void convertData()
         {
+            /*
+             * This method extracts each row from the grid of bytes
+             * and uses the pre-grouped bytes to get the floats
+            */
             lock(data)
             {
-                    // Acceleration
-                    data[0] = BitConverter.ToSingle(dataBytes[0]);
-                    data[1] = BitConverter.ToSingle(dataBytes[1]);
-                    data[2] = BitConverter.ToSingle(dataBytes[2]);
+                // Acceleration
+                data[0] = BitConverter.ToSingle(dataBytes[0]);
+                data[1] = BitConverter.ToSingle(dataBytes[1]);
+                data[2] = BitConverter.ToSingle(dataBytes[2]);
 
-                    // Magnometer
-                    data[3] = BitConverter.ToSingle(dataBytes[3]);
-                    data[4] = BitConverter.ToSingle(dataBytes[4]);
-                    data[5] = BitConverter.ToSingle(dataBytes[5]);
+                // Magnometer
+                data[3] = BitConverter.ToSingle(dataBytes[3]);
+                data[4] = BitConverter.ToSingle(dataBytes[4]);
+                data[5] = BitConverter.ToSingle(dataBytes[5]);
 
-                    // Gyroscope
-                    data[6] = BitConverter.ToSingle(dataBytes[6]);
-                    data[7] = BitConverter.ToSingle(dataBytes[7]);
-                    data[8] = BitConverter.ToSingle(dataBytes[8]);
+                // Gyroscope
+                data[6] = BitConverter.ToSingle(dataBytes[6]);
+                data[7] = BitConverter.ToSingle(dataBytes[7]);
+                data[8] = BitConverter.ToSingle(dataBytes[8]);
 
+                // Fire the event, data convertion finished!
                 DataProcessed(data);
             }
         }

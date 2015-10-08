@@ -5,17 +5,15 @@ using Microsoft.SPOT.Hardware;
 using Microsoft.SPOT.Net.NetworkInformation;
 using NetduinoGo;
 using SecretLabs.NETMF.Hardware.Netduino;
-using System.IO;
 using System.Net;
-using System.Text;
 using System.Threading;
 
 namespace ACDC_Control
 {
     public class Program
     {
+        //static FileStream writer = new FileStream(csvPath, FileMode.Append);
         static string csvPath = @"\SD\data.csv";
-        static FileStream writer = new FileStream(csvPath, FileMode.Append);
 
         public static void Main()
         {
@@ -38,7 +36,7 @@ namespace ACDC_Control
             lightOutput.SetColor(255, 0, 0);
             lightOutput.SetBrightness(0.1);
 
-            imu.InitializeDataStream();
+            imu.StartReading();
             imu.DataProcessed += Imu_DataProcessed;
             while (IPAddress.GetDefaultLocalAddress() == IPAddress.Any)
             {
@@ -53,10 +51,13 @@ namespace ACDC_Control
 
         private static void Imu_DataProcessed(float[] data)
         {
-            string dataLine = data[0] + ", " + data[1] + ", " + data[2] + ", " + data[3] + ", "
-                            + data[4] + ", " + data[5] + ", " + data[6] + ", " + data[7] + "\n";
-            byte[] buffer = Encoding.UTF8.GetBytes(dataLine);
-            writer.Write(buffer, 0, buffer.Length);
+            // Here we can show how the even is being fired and the
+            // the data prints to the debug window when calculated.
+            string dataString = "";
+            for (int i = 0; i < 9; i++)
+                dataString += ((int)data[i]).ToString("D4") + ", ";
+            Debug.Print(dataString);
+
         }
 
         /// <summary>
