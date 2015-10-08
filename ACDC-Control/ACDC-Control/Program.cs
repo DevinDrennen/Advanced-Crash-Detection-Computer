@@ -1,19 +1,26 @@
 ﻿using ACDC_Control.DSP.Types;
+using ACDC_Control.IMU;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 using Microsoft.SPOT.Net.NetworkInformation;
 using NetduinoGo;
 using SecretLabs.NETMF.Hardware.Netduino;
+using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading;
 
 namespace ACDC_Control
 {
     public class Program
     {
+        static string csvPath = @"\SD\data.csv";
+        static FileStream writer = new FileStream(csvPath, FileMode.Append);
+
         public static void Main()
         {
-            ComplexNumTests();
+            //ComplexNumTests();
+            MainTests();
         }
 
         /// <summary>
@@ -32,6 +39,7 @@ namespace ACDC_Control
             lightOutput.SetBrightness(0.1);
 
             imu.InitializeDataStream();
+            imu.DataProcessed += Imu_DataProcessed;
             while (IPAddress.GetDefaultLocalAddress() == IPAddress.Any)
             {
                 //Debug.Print("Waiting for IP...");
@@ -42,7 +50,15 @@ namespace ACDC_Control
             Debug.Print("Got IP: " + wifi.IPAddress);
             lightOutput.SetColor(0, 255, 0);
         }
-        
+
+        private static void Imu_DataProcessed(float[] data)
+        {
+            string dataLine = data[0] + ", " + data[1] + ", " + data[2] + ", " + data[3] + ", "
+                            + data[4] + ", " + data[5] + ", " + data[6] + ", " + data[7] + "\n";
+            byte[] buffer = Encoding.UTF8.GetBytes(dataLine);
+            writer.Write(buffer, 0, buffer.Length);
+        }
+
         /// <summary>
         /// Test complex number type.
         /// </summary>

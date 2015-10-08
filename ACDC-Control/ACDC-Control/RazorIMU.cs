@@ -1,21 +1,28 @@
 using Microsoft.SPOT;
+using Microsoft.SPOT.Hardware;
+using SecretLabs.NETMF.Hardware.Netduino;
 using System;
 using System.IO.Ports;
 using System.Text;
 using System.Threading;
 
-namespace ACDC_Control
+namespace ACDC_Control.IMU
 {
+    public delegate void DataConverted(float[] data);
+
     /// <summary>
     /// Razor IMU instance
     /// </summary>
     public class RazorIMU
     {
+        public event DataConverted DataProcessed = delegate { };
         private SerialPort razorIMU;
         private Thread serialReadThread;
-        private byte[] syncByteArray, syncOKByteArray, syncOKBuffer;
 
-        const int BYTES_PER_FLOAT = 4, FLOATS_PER_TRANS = 9, CHUNK_SIZE = BYTES_PER_FLOAT * FLOATS_PER_TRANS;
+        private byte[] syncByteArray, syncOKByteArray, syncOKBuffer;
+        private byte[][] dataBytes;
+
+        const int BYTES_PER_FLOAT = 4, FLOATS_PER_TRANS = 9, TRANS_SIZE = BYTES_PER_FLOAT * FLOATS_PER_TRANS;
         private float[] data;
 
         /// <summary>
@@ -47,6 +54,11 @@ namespace ACDC_Control
 
             razorIMU = new SerialPort(port, baudRate);
             data = new float[FLOATS_PER_TRANS];
+
+            dataBytes = new byte[FLOATS_PER_TRANS][];
+
+            for (int i = 0; i < FLOATS_PER_TRANS; i++)
+                dataBytes[i] = new byte[BYTES_PER_FLOAT];
         }
 
         /// <summary>
@@ -66,6 +78,7 @@ namespace ACDC_Control
             // If port isn't open yet, open it.
             if(!razorIMU.IsOpen)
                 razorIMU.Open();
+
             // Send sync signal
             razorIMU.Write(syncByteArray, 0, syncByteArray.Length); 
 
@@ -74,7 +87,7 @@ namespace ACDC_Control
             {
                 // Lets not wait forever, 
                 // after a full frame, its time to stop and report an error.
-                if (bytesRead == 37) 
+                if (bytesRead == 72) 
                     break;
 
                 // Read in the next byte and increase how many have been read.
@@ -88,8 +101,7 @@ namespace ACDC_Control
                 nextByte = razorIMU.ReadByte();
                 if (nextByte != syncOKByteArray[i])
                 {
-                    // Report problem, close port, and return a fail
-                    Debug.Print("Problem connecting to Razor IMU.");
+                    // Close port, and return a fail
                     razorIMU.Close();
                     return false;
                 }
@@ -108,29 +120,38 @@ namespace ACDC_Control
         /// </summary>
         private void readStream()
         {
-            // Variables to keep track of and store data
-            int bytesRead = 0;
-            byte[] streamChunk = new byte[CHUNK_SIZE];
-            string dataString;
+            // Variables to keep track of place in array to store data.
+            int floatIndex = 0, byteIndex = 0, nextByte;
 
+            // As long as the serial port is open
             while(razorIMU.IsOpen)
             {
-                // Store the next byte read into the next spot on the array and increase how many bytes have been read.
-                streamChunk[bytesRead] = (byte)razorIMU.ReadByte();
-                bytesRead++;
+                // Read the next byte
+                nextByte = razorIMU.ReadByte();
 
-                // If CHUNK_SIZE (36) bytes have been read
-                if(bytesRead == CHUNK_SIZE)
+                // If its not -1 (timeout, no byte to read)
+                if (nextByte != -1)
                 {
-                    // Reset the counter and convert the array
-                    bytesRead = 0;
-                    convertData(streamChunk);
+                    // Store it in the next place of the 2D jagged array,
+                    dataBytes[floatIndex][byteIndex] = (byte)nextByte;
+                    byteIndex++; // then increase the 2nd dimension (bytes) index.
 
-                    // This is debugging stuff to see what the array looks like
-                    dataString = "";
-                    for (int i = 0; i < FLOATS_PER_TRANS; i++)
-                        dataString += ((int)data[i]).ToString("D4") + ", ";
-                    Debug.Print(dataString);
+                    // If the (4) bytes have been put in place, for the current float, 
+                    
+                    if (byteIndex == BYTES_PER_FLOAT)
+                    {
+                        // then reset the 2nd dimension (byte) index and increase the 1st dimension (float) index
+                        byteIndex = 0;
+                        floatIndex++;
+
+                        // If all the float's bytes have been filled in,
+                        if (floatIndex == FLOATS_PER_TRANS)
+                        {
+                            // then reset the 1st dimension (float) index and convert the data.
+                            floatIndex = 0;
+                            convertData();
+                        }
+                    }
                 }
             }
         }
@@ -138,24 +159,26 @@ namespace ACDC_Control
         /// <summary>
         /// Convert the byte array to the floats represented byte each 4 bytes.
         /// </summary>
-        /// <param name="streamChunk"></param>
-        private void convertData(byte[] streamChunk)
+        private void convertData()
         {
-            int floatIndex = 0;
-            byte[] floatChunk = new byte[4];
-
             lock(data)
             {
-                // Extract 4 bytes at a time to make a float
-                for(int i = 0; i < CHUNK_SIZE; i += BYTES_PER_FLOAT)
-                {
-                    floatChunk[0] = streamChunk[i];
-                    floatChunk[1] = streamChunk[i + 1];
-                    floatChunk[2] = streamChunk[i + 2];
-                    floatChunk[3] = streamChunk[i + 3];
-                    data[floatIndex] = BitConverter.ToSingle(floatChunk);
-                    floatIndex++;
-                }
+                    // Acceleration
+                    data[0] = BitConverter.ToSingle(dataBytes[0]);
+                    data[1] = BitConverter.ToSingle(dataBytes[1]);
+                    data[2] = BitConverter.ToSingle(dataBytes[2]);
+
+                    // Magnometer
+                    data[3] = BitConverter.ToSingle(dataBytes[3]);
+                    data[4] = BitConverter.ToSingle(dataBytes[4]);
+                    data[5] = BitConverter.ToSingle(dataBytes[5]);
+
+                    // Gyroscope
+                    data[6] = BitConverter.ToSingle(dataBytes[6]);
+                    data[7] = BitConverter.ToSingle(dataBytes[7]);
+                    data[8] = BitConverter.ToSingle(dataBytes[8]);
+
+                DataProcessed(data);
             }
         }
     }
