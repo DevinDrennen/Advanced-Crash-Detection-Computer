@@ -35,10 +35,11 @@
   <ItemGroup>
     <Compile Include="BitConverter.cs" />
     <Compile Include="BugFix.cs" />
+    <Compile Include="DSP\Vector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RazorIMU.cs" />
-    <Compile Include="DSP\Types.cs" />
+    <Compile Include="DSP\Complex.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.SPOT.Hardware" />

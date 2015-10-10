@@ -97,5 +97,17 @@ namespace ACDC_Control
             (3 + 9i) + 3 is (6 + 9i)
             */
         }
+
+        /// <summary>
+        /// Test vector type.
+        /// </summary>
+        private static void VectorTests()
+        {
+            Vector v0 = Vector.Zero, v1 = Vector.Unit;
+
+            /*
+            Write tests!
+            */
+        }
     }
 }

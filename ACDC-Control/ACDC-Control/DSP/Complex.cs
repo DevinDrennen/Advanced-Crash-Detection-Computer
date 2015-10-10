@@ -8,9 +8,7 @@ namespace ACDC_Control.DSP.Types
         #region Special Complex
 
         public static readonly Complex Unit = new Complex(1, 1);
-
-        public static readonly Complex One = new Complex(1);
-
+        
         public static readonly Complex Zero = new Complex();
 
         #endregion
@@ -197,6 +195,15 @@ namespace ACDC_Control.DSP.Types
         #region Methods
 
         /// <summary>
+        /// Gets the comjugate.
+        /// </summary>
+        /// <returns></returns>
+        public Complex Conjugate()
+        {
+            return new Complex(Real, -Imaginary);
+        }
+
+        /// <summary>
         /// Print out text representation of the complex number.
         /// </summary>
         /// <param name="realFormat">Formating for real part float</param>
@@ -210,15 +217,6 @@ namespace ACDC_Control.DSP.Types
         #endregion
 
         #region Overrides
-
-        /// <summary>
-        /// Gets the comjugate.
-        /// </summary>
-        /// <returns></returns>
-        public Complex Conjugate()
-        {
-            return new Complex(Real, -Imaginary);
-        }
 
         /// <summary>
         /// Check if this complex number is equal to an object passed
