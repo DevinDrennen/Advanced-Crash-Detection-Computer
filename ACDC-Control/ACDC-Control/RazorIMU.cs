@@ -66,7 +66,7 @@ namespace ACDC_Control.IMU
                 razorIMU.Open();
 
             // Initialize stream reader and set state to initialized
-            serialReadThread = new Thread(new ThreadStart(readStream));
+            serialReadThread = new Thread(readStream);
             serialReadThread.Start();
             Initilized = true;
 

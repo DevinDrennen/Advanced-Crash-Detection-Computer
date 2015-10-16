@@ -1,5 +1,6 @@
 ﻿using ACDC_Control.DSP.Types;
 using ACDC_Control.IMU;
+using ACDC_Control.WebServer;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 using Microsoft.SPOT.Net.NetworkInformation;
@@ -26,9 +27,7 @@ namespace ACDC_Control
         /// </summary>
         private static void MainTests()
         {
-            NetworkInterface wifi = Microsoft.SPOT.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0];
-            // Lets keep the button for reseting for now... 
-            //InputPort buttonInput = new InputPort(Pins.ONBOARD_BTN, true, Port.ResistorMode.PullDown);
+            NetworkInterface wifi = NetworkInterface.GetAllNetworkInterfaces()[0];
             RazorIMU imu = new RazorIMU(SerialPorts.COM1);
             OutputPort activityLED = new OutputPort(Pins.ONBOARD_LED, false);
             RgbLed lightOutput = new RgbLed();
@@ -38,6 +37,7 @@ namespace ACDC_Control
 
             imu.StartReading();
             imu.DataProcessed += Imu_DataProcessed;
+
             while (IPAddress.GetDefaultLocalAddress() == IPAddress.Any)
             {
                 //Debug.Print("Waiting for IP...");
@@ -46,6 +46,8 @@ namespace ACDC_Control
             }
 
             Debug.Print("Got IP: " + wifi.IPAddress);
+            WebDisplay.Initialize();
+
             lightOutput.SetColor(0, 255, 0);
         }
 
@@ -57,7 +59,6 @@ namespace ACDC_Control
             for (int i = 0; i < 9; i++)
                 dataString += ((int)data[i]).ToString("D4") + ", ";
             Debug.Print(dataString);
-
         }
 
         /// <summary>
