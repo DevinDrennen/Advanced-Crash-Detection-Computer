@@ -19,6 +19,8 @@ namespace ACDC_Control
         public static void Main()
         {
             //ComplexNumTests();
+            //VectorTests();
+
             MainTests();
         }
 
@@ -27,28 +29,23 @@ namespace ACDC_Control
         /// </summary>
         private static void MainTests()
         {
-            NetworkInterface wifi = NetworkInterface.GetAllNetworkInterfaces()[0];
             RazorIMU imu = new RazorIMU(SerialPorts.COM1);
             OutputPort activityLED = new OutputPort(Pins.ONBOARD_LED, false);
-            RgbLed lightOutput = new RgbLed();
-
-            lightOutput.SetColor(255, 0, 0);
-            lightOutput.SetBrightness(0.1);
-
+            
+            // Start reading data from the sensor and set up event to receive converted/pprocessed data.
             imu.StartReading();
             imu.DataProcessed += Imu_DataProcessed;
 
-            while (IPAddress.GetDefaultLocalAddress() == IPAddress.Any)
+            // Start the web data display
+            WebDisplay.Initialize();
+
+            // Loop forever to keep the code running
+            while (true)
             {
-                //Debug.Print("Waiting for IP...");
+                // Just plash the on board led to let us know code hasn't crashed
                 activityLED.Write(!activityLED.Read());
                 Thread.Sleep(1000);
             }
-
-            Debug.Print("Got IP: " + wifi.IPAddress);
-            WebDisplay.Initialize();
-
-            lightOutput.SetColor(0, 255, 0);
         }
 
         private static void Imu_DataProcessed(float[] data)
@@ -58,6 +55,14 @@ namespace ACDC_Control
             string dataString = "";
             for (int i = 0; i < 9; i++)
                 dataString += ((int)data[i]).ToString("D4") + ", ";
+
+            // Update the sensor data for the web display to show.
+            /* This has been tested and shown to work on a custom subnet while
+             * we wait to properly set up a connect in the school's network. 
+            */
+            WebDisplay.DataString = dataString;
+
+            // Print the datastring to the debug output
             Debug.Print(dataString);
         }
 

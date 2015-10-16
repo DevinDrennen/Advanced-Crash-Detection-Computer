@@ -6,7 +6,7 @@ namespace ACDC_Control.IMU
     public delegate void DataConverted(float[] data);
 
     /// <summary>
-    /// Razor IMU instance
+    /// Razor IMU instance. Reads data from sensor on serial COM port.
     /// </summary>
     public class RazorIMU
     {
