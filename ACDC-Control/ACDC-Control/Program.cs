@@ -20,8 +20,9 @@ namespace ACDC_Control
         {
             //ComplexNumTests();
             //VectorTests();
+            MatrixTests(); 
 
-            MainTests();
+            //MainTests();
         }
 
         /// <summary>
@@ -69,6 +70,9 @@ namespace ACDC_Control
         /// <summary>
         /// Test complex number type.
         /// </summary>
+        /// <remarks>
+        /// PASSING 10/17/2015
+        /// </remarks>
         private static void ComplexNumTests()
         {
             Complex c1 = 1, c2 = 0, c3 = Complex.Unit;
@@ -87,21 +91,6 @@ namespace ACDC_Control
             Debug.Print(c6 + " / 5 is " + (c6 / 5));
             Debug.Print(c6 + " * " + c4 + " is " + (c6 * c4) + " with phase " + ((c6 * c4).Phase * (180 / System.Math.PI)) + " degrees");
             Debug.Print(c7 + " + 3 is " + (c7 + 3));
-
-            /*
-            Print out confirms proper functioning:
-
-            Float 1 becomes: (1 + 0i)
-            Float 0 becomes: (0 + 0i)
-            Unit Complex is: (1 + 1i)
-            The conjugate of (2 + 2i) is (2 + -2i)
-            Magnitude and Phase of (2 + 2i) are 2.82842708 and 0.785398185 radians
-            (2 + 2i) + (2 + -4i) is (4 + -2i)
-            (5 + 5i) * 2 is (10 + 10i)
-            (5 + 5i) / 5 is (1 + 1i)
-            (5 + 5i) * (2 + 2i) is (0 + 20i) with phase 90.000002504478161 degrees
-            (3 + 9i) + 3 is (6 + 9i)
-            */
         }
 
         /// <summary>
@@ -114,6 +103,48 @@ namespace ACDC_Control
             /*
             Write tests!
             */
+        }
+
+        /// <summary>
+        /// Test matrix type.
+        /// </summary>
+        /// <remarks>
+        /// PASSING 10/17/2015
+        /// </remarks>
+        private static void MatrixTests()
+        {
+            Matrix A = new Matrix(new float[][]{
+                new float[]{ 1, 2},
+                new float[]{ 3, 4},
+                new float[]{ 5, 6},
+                new float[]{ 7, 8}
+            }, 4, 2);
+
+            Matrix B = new Matrix(new float[][]{
+                new float[]{ 10, 11},
+                new float[]{ 12, 13},
+            }, 2, 2);
+
+            Matrix B2 = new Matrix(new float[][]{
+                new float[]{ 3, 4},
+                new float[]{ 13, 14},
+            }, 2, 2);
+
+            Matrix C = new Matrix(new float[][]{
+                new float[]{ 10, 15, 20},
+                new float[]{ -30, -40, -50},
+            }, 2, 3);
+
+            Matrix D = Matrix.CreateIdentityMatrix(3);
+
+            Debug.Print("A * 2:\n" + (A * 2));
+            Debug.Print("B + B2:\n" + (B + B2));
+            Debug.Print("B - B2:\n" + (B - B2));
+            Debug.Print("B * C:\n" + (B * C));
+            Debug.Print("A Transpose:\n" + A.GetTranspose());
+            Debug.Print("B Transpose:\n" + B.GetTranspose());
+            Debug.Print("C Transpose:\n" + C.GetTranspose());
+            Debug.Print("D:\n" + D);
         }
     }
 }
