@@ -1,13 +1,16 @@
 using System;
 using Microsoft.SPOT;
 
-namespace ACDC_Control.DSP.Types
+namespace ACDC_Control.Math.Types
 {
     public struct Vector
     {
         public static readonly Vector Unit = new Vector(1, 1, 1);
-        
         public static readonly Vector Zero = new Vector(0, 0, 0);
+
+        public static readonly Vector X_Axis = new Vector(1, 0, 0);
+        public static readonly Vector Y_Axis = new Vector(0, 1, 0);
+        public static readonly Vector Z_Axis = new Vector(0, 0, 1);
 
         private float[] v;
 

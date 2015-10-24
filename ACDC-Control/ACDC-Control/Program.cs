@@ -1,4 +1,4 @@
-﻿using ACDC_Control.DSP.Types;
+﻿using ACDC_Control.Math.Types;
 using ACDC_Control.IMU;
 using ACDC_Control.WebServer;
 using Microsoft.SPOT;
@@ -13,6 +13,7 @@ namespace ACDC_Control
 {
     public class Program
     {
+        static RazorIMU imu;
         //static FileStream writer = new FileStream(csvPath, FileMode.Append);
         static string csvPath = @"\SD\data.csv";
 
@@ -20,9 +21,9 @@ namespace ACDC_Control
         {
             //ComplexNumTests();
             //VectorTests();
-            MatrixTests(); 
+            //MatrixTests(); 
 
-            //MainTests();
+            MainTests();
         }
 
         /// <summary>
@@ -30,15 +31,21 @@ namespace ACDC_Control
         /// </summary>
         private static void MainTests()
         {
-            RazorIMU imu = new RazorIMU(SerialPorts.COM1);
+            imu = new RazorIMU(SerialPorts.COM1);
             OutputPort activityLED = new OutputPort(Pins.ONBOARD_LED, false);
+
+            // Wait for internet connectivity
+            while (NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress == IPAddress.Any.ToString())
+                Thread.Sleep(100);
+            // Print the IP address of the netduino
+            Debug.Print(NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress);
+
+            // Start the web data display
+            WebDisplay.Initialize();
             
             // Start reading data from the sensor and set up event to receive converted/pprocessed data.
             imu.StartReading();
             imu.DataProcessed += Imu_DataProcessed;
-
-            // Start the web data display
-            WebDisplay.Initialize();
 
             // Loop forever to keep the code running
             while (true)
@@ -49,22 +56,9 @@ namespace ACDC_Control
             }
         }
 
-        private static void Imu_DataProcessed(float[] data)
+        private static void Imu_DataProcessed()
         {
-            // Here we can show how the even is being fired and the
-            // the data prints to the debug window when calculated.
-            string dataString = "";
-            for (int i = 0; i < 9; i++)
-                dataString += ((int)data[i]).ToString("D4") + ", ";
-
-            // Update the sensor data for the web display to show.
-            /* This has been tested and shown to work on a custom subnet while
-             * we wait to properly set up a connect in the school's network. 
-            */
-            WebDisplay.DataString = dataString;
-
-            // Print the datastring to the debug output
-            Debug.Print(dataString);
+            WebDisplay.FormatIMUDataString(imu.Data);
         }
 
         /// <summary>

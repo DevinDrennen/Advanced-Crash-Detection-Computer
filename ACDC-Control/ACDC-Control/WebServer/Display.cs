@@ -16,6 +16,8 @@ namespace ACDC_Control.WebServer
     /// </remarks>
     public static class WebDisplay
     {
+        static string jQScript;
+
         /// <summary>
         /// Listener which waits for web requests from clients
         /// </summary>
@@ -24,18 +26,28 @@ namespace ACDC_Control.WebServer
         /// <summary>
         /// One of the strings to test the displaying of data
         /// </summary>
-        public static string DataString { get; set; }
+        public static string DataString { get; private set; }
 
         /// <summary>
         /// Begin the web display so web responses are answered with the webpage
         /// </summary>
         /// <param name="port">The port on which we will accept a connection to the web display</param>
-        public static void Initialize(int port = 80)
+        public static void Initialize(int port = 80, int updatePeriod = 100)
         {
             // Set up the listener to wait for requests from clients on <port>
             // Also set up the event to be triggered when a request is received.
             webListener = new Listener(port);
             webListener.ReceivedRequest += WebListener_ReceivedRequest;
+
+            jQScript = "<script>" +
+                            "setInterval(function(){ imuDataUpdate() }, " + updatePeriod + ");" +
+                            "function imuDataUpdate(){" +
+                                "$.get(\"imuData.html\", function(data){" +
+                                    "document.getElementById(\"imuDataText\").innerHTML = data;" +
+                                "});" +
+                            "}" +
+                        "</script>";
+            DataString = "";
         }
 
         /// <summary>
@@ -45,15 +57,32 @@ namespace ACDC_Control.WebServer
         /// <param name="request"></param>
         private static void WebListener_ReceivedRequest(Request request)
         {
-            // Curent test is just to show a snapshot of the current IMU data
-            request.SendResponse(
-                "<html>" +
-                "<header><title>ACDC</title></header>" +
-                "<body>" +
-                DataString +
-                "</body>" +
-                "</html>"
-                );
+            if (request.URL != "/imuData.html")
+            {
+                request.SendResponse(
+                    "<!DOCTYPE html>" +
+                    "<html>" +
+                    "<head>" +
+                    "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js\"></script>" +
+                    "<title>ACDC</title>" +
+                    "</head>" +
+                    "<h2>IMU Data:</h2>" +
+                    "<p id=\"imuDataText\"></p>" +
+                    jQScript +
+                    "</body>" +
+                    "</html>"
+                    );
+            }
+            else
+                lock(DataString)
+                    request.SendResponse(DataString);
+        }
+
+        public static void FormatIMUDataString(float[] data)
+        {
+            DataString = "";
+            foreach (float val in data)
+                DataString += ((int)val).ToString("D4") + "</br>";
         }
     }
 }

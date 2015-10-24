@@ -1,7 +1,7 @@
 using System;
 using Microsoft.SPOT;
 
-namespace ACDC_Control.DSP.Types
+namespace ACDC_Control.Math.Types
 {
     public struct Matrix
     {

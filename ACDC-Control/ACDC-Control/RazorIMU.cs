@@ -1,9 +1,10 @@
- using System.IO.Ports;
+using System;
+using System.IO.Ports;
 using System.Threading;
 
 namespace ACDC_Control.IMU
 {
-    public delegate void DataConverted(float[] data);
+    public delegate void DataConverted();
 
     /// <summary>
     /// Razor IMU instance. Reads data from sensor on serial COM port.
@@ -18,7 +19,7 @@ namespace ACDC_Control.IMU
 
         private byte[][] dataBytes;
         private byte[] syncBytes;
-        private float[] data;
+        private float[] data, ypr;
 
         /// <summary>
         /// Indicates if communication has been initilized between the sensor and netduino.
@@ -35,6 +36,12 @@ namespace ACDC_Control.IMU
             private set { data = value; }
         }
 
+        public float[] YPR
+        {
+            get { return ypr; }
+            private set { ypr = value; }
+        }
+
         /// <summary>
         /// Razor IMU object constructor. 
         /// </summary>
@@ -44,8 +51,9 @@ namespace ACDC_Control.IMU
         {
             razorIMU = new SerialPort(port, baudRate);
             syncBytes = new byte[] { 127, 128, 0, 0 };
-            data = new float[FLOATS_PER_TRANS];
             dataBytes = new byte[FLOATS_PER_TRANS][];
+            data = new float[FLOATS_PER_TRANS];
+            ypr = new float[3];
 
             for (int i = 0; i < FLOATS_PER_TRANS; i++)
                 dataBytes[i] = new byte[BYTES_PER_FLOAT];
@@ -151,7 +159,8 @@ namespace ACDC_Control.IMU
         {
             /*
              * This method extracts each row from the grid of bytes
-             * and uses the pre-grouped bytes to get the floats
+             * and uses the pre-grouped bytes to get the floats.
+             * It also converts the sensor values to euler angles.
             */
             lock(data)
             {
@@ -170,8 +179,13 @@ namespace ACDC_Control.IMU
                 data[7] = BitConverter.ToSingle(dataBytes[7]);
                 data[8] = BitConverter.ToSingle(dataBytes[8]);
 
+                // Calculate yaw, pitch, roll (ypr). ypr is in the form [yaw, pitch, roll]
+                ypr[0] = 0;
+                ypr[1] = 0;
+                ypr[2] = 0;
+
                 // Fire the event, data convertion finished!
-                DataProcessed(data);
+                DataProcessed();
             }
         }
     }
