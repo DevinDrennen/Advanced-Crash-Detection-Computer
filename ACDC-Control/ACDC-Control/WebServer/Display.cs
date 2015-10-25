@@ -32,22 +32,23 @@ namespace ACDC_Control.WebServer
         /// Begin the web display so web responses are answered with the webpage
         /// </summary>
         /// <param name="port">The port on which we will accept a connection to the web display</param>
-        public static void Initialize(int port = 80, int updatePeriod = 100)
+        public static void Initialize(int port = 80, int updatePeriod = 200)
         {
-            // Set up the listener to wait for requests from clients on <port>
-            // Also set up the event to be triggered when a request is received.
-            webListener = new Listener(port);
-            webListener.ReceivedRequest += WebListener_ReceivedRequest;
-
+            // Set up some needed strings before allowing web resqests!
+            DataString = ""; 
             jQScript = "<script>" +
                             "setInterval(function(){ imuDataUpdate() }, " + updatePeriod + ");" +
                             "function imuDataUpdate(){" +
-                                "$.get(\"imuData.html\", function(data){" +
+                                "$.get(\"imuData\", function(data, status){" +
                                     "document.getElementById(\"imuDataText\").innerHTML = data;" +
                                 "});" +
                             "}" +
                         "</script>";
-            DataString = "";
+            
+            // Set up the listener to wait for requests from clients on <port>
+            // Also set up the event to be triggered when a request is received.
+            webListener = new Listener(port);
+            webListener.ReceivedRequest += WebListener_ReceivedRequest;
         }
 
         /// <summary>
@@ -57,32 +58,38 @@ namespace ACDC_Control.WebServer
         /// <param name="request"></param>
         private static void WebListener_ReceivedRequest(Request request)
         {
-            if (request.URL != "/imuData.html")
+            switch (request.URL)
             {
-                request.SendResponse(
-                    "<!DOCTYPE html>" +
-                    "<html>" +
-                    "<head>" +
-                    "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js\"></script>" +
-                    "<title>ACDC</title>" +
-                    "</head>" +
-                    "<h2>IMU Data:</h2>" +
-                    "<p id=\"imuDataText\"></p>" +
-                    jQScript +
-                    "</body>" +
-                    "</html>"
-                    );
+                case "/":
+                    request.SendResponse(
+                        "<!DOCTYPE html>" +
+                        "<html>" +
+                        "<head>" +
+                        "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js\"></script>" +
+                        "<title>ACDC</title>" +
+                        "</head>" +
+                        "<h2>IMU Acceleration:</h2>" +
+                        "<p id=\"imuDataText\" style=\"margin - bottom:0px; font - family: 'Courier New', Courier, monospace\" ></p>" +
+                        jQScript +
+                        "</body>" +
+                        "</html>"
+                        );
+                    break;
+                case "/imuData":
+                    lock (DataString)
+                        request.SendResponse(DataString);
+                    break;
+                default:
+                    break;
             }
-            else
-                lock(DataString)
-                    request.SendResponse(DataString);
         }
 
         public static void FormatIMUDataString(float[] data)
         {
-            DataString = "";
-            foreach (float val in data)
-                DataString += ((int)val).ToString("D4") + "</br>";
+            lock (DataString)
+                DataString = "X: " + data[0] + "</br>" +
+                                "Y: " + data[1] + "</br>" +
+                                "Z: " + data[2] + "</br>";
         }
     }
 }

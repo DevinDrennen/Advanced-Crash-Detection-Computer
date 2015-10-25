@@ -63,7 +63,7 @@ namespace ACDC_Control.IMU
         /// Begin reading serial data from the sensor.
         /// </summary>
         /// <returns>True if initialized correctly, false otherwise.</returns>
-        public bool StartReading()
+        public void StartReading()
         {
             // If the stream reader is alive, stop it!
             if (serialReadThread != null && serialReadThread.IsAlive)
@@ -75,10 +75,9 @@ namespace ACDC_Control.IMU
 
             // Initialize stream reader and set state to initialized
             serialReadThread = new Thread(readStream);
+            serialReadThread.Priority = ThreadPriority.AboveNormal;
             serialReadThread.Start();
             Initilized = true;
-
-            return true;
         }
 
         /// <summary>
@@ -105,6 +104,7 @@ namespace ACDC_Control.IMU
                     while (nextByte != syncBytes[0])
                         nextByte = razorIMU.ReadByte();
 
+                    synced = true;
                     // Check the following values to ensure it is the sync signal
                     for (int i = 1; i < syncBytes.Length; i++)
                     {
@@ -115,8 +115,6 @@ namespace ACDC_Control.IMU
                             synced = false;
                             break;
                         }
-
-                        synced = true;
                     }
                 }
 
@@ -130,7 +128,7 @@ namespace ACDC_Control.IMU
                     // While there are more cells within this row to fill...
                     while (byteIndex < BYTES_PER_FLOAT)
                     {
-                        // Read the nect byte
+                        // Read the next byte
                         nextByte = razorIMU.ReadByte();
 
                         // If read was successful
@@ -162,31 +160,29 @@ namespace ACDC_Control.IMU
              * and uses the pre-grouped bytes to get the floats.
              * It also converts the sensor values to euler angles.
             */
-            lock(data)
-            {
-                // Acceleration
-                data[0] = BitConverter.ToSingle(dataBytes[0]);
-                data[1] = BitConverter.ToSingle(dataBytes[1]);
-                data[2] = BitConverter.ToSingle(dataBytes[2]);
 
-                // Magnometer
-                data[3] = BitConverter.ToSingle(dataBytes[3]);
-                data[4] = BitConverter.ToSingle(dataBytes[4]);
-                data[5] = BitConverter.ToSingle(dataBytes[5]);
+            // Acceleration
+            data[0] = BitConverter.ToSingle(dataBytes[0]);
+            data[1] = BitConverter.ToSingle(dataBytes[1]);
+            data[2] = BitConverter.ToSingle(dataBytes[2]);
 
-                // Gyroscope
-                data[6] = BitConverter.ToSingle(dataBytes[6]);
-                data[7] = BitConverter.ToSingle(dataBytes[7]);
-                data[8] = BitConverter.ToSingle(dataBytes[8]);
+            // Magnometer
+            data[3] = BitConverter.ToSingle(dataBytes[3]);
+            data[4] = BitConverter.ToSingle(dataBytes[4]);
+            data[5] = BitConverter.ToSingle(dataBytes[5]);
 
-                // Calculate yaw, pitch, roll (ypr). ypr is in the form [yaw, pitch, roll]
-                ypr[0] = 0;
-                ypr[1] = 0;
-                ypr[2] = 0;
+            // Gyroscope
+            data[6] = BitConverter.ToSingle(dataBytes[6]);
+            data[7] = BitConverter.ToSingle(dataBytes[7]);
+            data[8] = BitConverter.ToSingle(dataBytes[8]);
 
-                // Fire the event, data convertion finished!
-                DataProcessed();
-            }
+            // Calculate yaw, pitch, roll (ypr). ypr is in the form [yaw, pitch, roll]
+            ypr[0] = 0;
+            ypr[1] = 0;
+            ypr[2] = 0;
+
+            // Fire the event, data convertion finished!
+            DataProcessed();
         }
     }
 }

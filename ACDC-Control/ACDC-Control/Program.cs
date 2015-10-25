@@ -13,52 +13,55 @@ namespace ACDC_Control
 {
     public class Program
     {
+        static Thread mainThread;
         static RazorIMU imu;
+        static OutputPort activityLED;
         //static FileStream writer = new FileStream(csvPath, FileMode.Append);
         static string csvPath = @"\SD\data.csv";
 
         public static void Main()
         {
+            mainThread = Thread.CurrentThread;
+
+            activityLED = new OutputPort(Pins.ONBOARD_LED, false);
+
+            // Wait for internet connectivity then print the IP address of the netduino
+            while (NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress == IPAddress.Any.ToString())
+                Thread.Sleep(100);
+            Debug.Print("NETDUINO 3 WIFI IP: " + NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress);
+
             //ComplexNumTests();
             //VectorTests();
             //MatrixTests(); 
+            InitializeACDC();
 
-            MainTests();
+            mainThread.Priority = ThreadPriority.BelowNormal;
+            // Loop forever to keep the code running
+            // flashing the on board led to let us know code hasn't crashed
+            while (true)
+            {
+                activityLED.Write(!activityLED.Read());
+                Thread.Sleep(10);
+            }
         }
 
         /// <summary>
-        /// Core set of tests.
+        /// Core system things.
         /// </summary>
-        private static void MainTests()
+        private static void InitializeACDC()
         {
-            imu = new RazorIMU(SerialPorts.COM1);
-            OutputPort activityLED = new OutputPort(Pins.ONBOARD_LED, false);
-
-            // Wait for internet connectivity
-            while (NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress == IPAddress.Any.ToString())
-                Thread.Sleep(100);
-            // Print the IP address of the netduino
-            Debug.Print(NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress);
-
-            // Start the web data display
+            // Start the web display
             WebDisplay.Initialize();
-            
+
             // Start reading data from the sensor and set up event to receive converted/pprocessed data.
+            imu = new RazorIMU(SerialPorts.COM1);
             imu.StartReading();
             imu.DataProcessed += Imu_DataProcessed;
-
-            // Loop forever to keep the code running
-            while (true)
-            {
-                // Just plash the on board led to let us know code hasn't crashed
-                activityLED.Write(!activityLED.Read());
-                Thread.Sleep(1000);
-            }
         }
 
         private static void Imu_DataProcessed()
         {
-            WebDisplay.FormatIMUDataString(imu.Data);
+             WebDisplay.FormatIMUDataString(imu.Data);
         }
 
         /// <summary>
