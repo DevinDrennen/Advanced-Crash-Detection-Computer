@@ -124,26 +124,26 @@ namespace ACDC_Control
         /// </remarks>
         private static void MatrixTests()
         {
-            Matrix A = new Matrix(new float[][]{
-                new float[]{ 1, 2},
-                new float[]{ 3, 4},
-                new float[]{ 5, 6},
-                new float[]{ 7, 8}
+            Matrix A = new Matrix(new double[][]{
+                new double[]{ 1, 2},
+                new double[]{ 3, 4},
+                new double[]{ 5, 6},
+                new double[]{ 7, 8}
             }, 4, 2);
 
-            Matrix B = new Matrix(new float[][]{
-                new float[]{ 10, 11},
-                new float[]{ 12, 13},
+            Matrix B = new Matrix(new double[][]{
+                new double[]{ 10, 11},
+                new double[]{ 12, 13},
             }, 2, 2);
 
-            Matrix B2 = new Matrix(new float[][]{
-                new float[]{ 3, 4},
-                new float[]{ 13, 14},
+            Matrix B2 = new Matrix(new double[][]{
+                new double[]{ 3, 4},
+                new double[]{ 13, 14},
             }, 2, 2);
 
-            Matrix C = new Matrix(new float[][]{
-                new float[]{ 10, 15, 20},
-                new float[]{ -30, -40, -50},
+            Matrix C = new Matrix(new double[][]{
+                new double[]{ 10, 15, 20},
+                new double[]{ -30, -40, -50},
             }, 2, 3);
 
             Matrix D = Matrix.CreateIdentityMatrix(3);

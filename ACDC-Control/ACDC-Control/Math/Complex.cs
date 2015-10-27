@@ -18,25 +18,25 @@ namespace ACDC_Control.Math.Types
         /// <summary>
         /// Gets the real component.
         /// </summary>
-        public float Real
+        public double Real
         { get; private set; }
 
         /// <summary>
         /// Gets the imaginary component.
         /// </summary>
-        public float Imaginary
+        public double Imaginary
         { get; private set; }
 
         /// <summary>
         /// Gets the magnitude (or absolute value).
         /// </summary>
-        public float Magnitude
+        public double Magnitude
         { get; private set; }
 
         /// <summary>
         /// Gets the phase.
         /// </summary>
-        public float Phase
+        public double Phase
         { get; private set; }
 
         #endregion
@@ -46,12 +46,12 @@ namespace ACDC_Control.Math.Types
         /// </summary>
         /// <param name="real">Real component.</param>
         /// <param name="img">Imaginary component.</param>
-        public Complex(float real = 0, float img = 0)
+        public Complex(double real = 0, double img = 0)
         {
             Real = real;
             Imaginary = img;
-            Magnitude = (float)System.Math.Sqrt(real * real + img * img);
-            Phase = (float)System.Math.Atan2(img, real);
+            Magnitude = System.Math.Sqrt(real * real + img * img);
+            Phase = System.Math.Atan2(img, real);
         }
 
         #region Operators
@@ -100,23 +100,23 @@ namespace ACDC_Control.Math.Types
         }
 
         /// <summary>
-        /// Multiply a complex number by a regular float.
+        /// Multiply a complex number by a regular double.
         /// </summary>
         /// <param name="c1">Complex factor.</param>
         /// <param name="f1">Float factor.</param>
         /// <returns></returns>
-        public static Complex operator *(Complex c1, float f1)
+        public static Complex operator *(Complex c1, double f1)
         {
             return new Complex(f1 * c1.Real, f1 * c1.Imaginary);
         }
 
         /// <summary>
-        /// Multiply a complex number by a regular float.
+        /// Multiply a complex number by a regular double.
         /// </summary>
         /// <param name="f1">Float factor.</param>
         /// <param name="c1">Complex factor.</param>
         /// <returns></returns>
-        public static Complex operator *(float f1, Complex c1)
+        public static Complex operator *(double f1, Complex c1)
         {
             return new Complex(f1 * c1.Real, f1 * c1.Imaginary);
         }
@@ -133,19 +133,19 @@ namespace ACDC_Control.Math.Types
             // ((ac + bd) / (c^2 + d^2)) + ((bc - ad) / (c^2 + d^2)i
             // where dividend is a + bi, and divisor is b + ci 
 
-            float a = dividend.Real, b = dividend.Imaginary;
-            float c = divisor.Real, d = divisor.Imaginary;
+            double a = dividend.Real, b = dividend.Imaginary;
+            double c = divisor.Real, d = divisor.Imaginary;
 
             return new Complex(((a * c + b * d) / (c * c + d * d)), ((b * c - a * d) / (c * c + d * d)));
         }
 
         /// <summary>
-        /// Devide a complex number by a regular float.
+        /// Devide a complex number by a regular double.
         /// </summary>
         /// <param name="dividend">Complex number to be divided.</param>
         /// <param name="divisor">Float to divide by.</param>
         /// <returns></returns>
-        public static Complex operator /(Complex dividend, float divisor)
+        public static Complex operator /(Complex dividend, double divisor)
         {
             return new Complex(dividend.Real / divisor, dividend.Imaginary / divisor);
         }
@@ -176,7 +176,7 @@ namespace ACDC_Control.Math.Types
         /// Implicitly convert float to the complex number with said float as the real component.
         /// </summary>
         /// <param name="real"></param>
-        public static implicit operator Complex(float real)
+        public static implicit operator Complex(double real)
         {
             return new Complex(real);
         }

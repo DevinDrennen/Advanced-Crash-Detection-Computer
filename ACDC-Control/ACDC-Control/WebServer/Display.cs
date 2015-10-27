@@ -86,7 +86,7 @@ namespace ACDC_Control.WebServer
             }
         }
 
-        public static void UpdateString(float[] data)
+        public static void UpdateString(double[] data)
         {
             lock (DataString)
             {

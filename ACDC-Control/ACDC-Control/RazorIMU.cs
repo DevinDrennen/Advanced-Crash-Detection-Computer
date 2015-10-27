@@ -20,7 +20,7 @@ namespace ACDC_Control.IMU
 
         private byte[][] dataBytes;
         private byte[] syncBytes;
-        private float[] _data;
+        private double[] _data;
 
         /// <summary>
         /// Indicates if communication has been initilized between the sensor and netduino.
@@ -31,7 +31,7 @@ namespace ACDC_Control.IMU
         /// Current data chunk from sensor.
         /// [accel x, accel y, accel z, magno x, magno y, magno z, gyro x, gyro y, gyro z]
         /// </summary>
-        public float[] Data
+        public double[] Data
         {
             get;
             private set;
@@ -47,7 +47,7 @@ namespace ACDC_Control.IMU
             razorIMU = new SerialPort(port, baudRate);
             syncBytes = new byte[] { 127, 128, 0, 0 };
             dataBytes = new byte[FLOATS_PER_TRANS][];
-            _data = new float[FLOATS_PER_TRANS];
+            _data = new double[FLOATS_PER_TRANS];
             Data = _data;
 
             for (int i = 0; i < FLOATS_PER_TRANS; i++)

@@ -5,7 +5,7 @@ namespace ACDC_Control.Math.Types
 {
     public struct Matrix
     {
-        private float[][] matrix;
+        private double[][] matrix;
 
         #region Properties
 
@@ -15,7 +15,7 @@ namespace ACDC_Control.Math.Types
         /// <param name="m">Row</param>
         /// <param name="n">Column</param>
         /// <returns></returns>
-        public float this[uint m, uint n]
+        public double this[uint m, uint n]
         {
             get
             {
@@ -57,10 +57,10 @@ namespace ACDC_Control.Math.Types
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="mat">2D float array with matrix values.</param>
+        /// <param name="mat">2D double array with matrix values.</param>
         /// <param name="rows">Number of rows.</param>
         /// <param name="cols">Number of columns.</param>
-        public Matrix(float[][] mat, uint rows, uint cols)
+        public Matrix(double[][] mat, uint rows, uint cols)
         {
             if (mat.Length != rows)
                 throw new Exception("Invalid number of rows in matrix!");
@@ -81,10 +81,10 @@ namespace ACDC_Control.Math.Types
         /// <param name="cols">Number of columns.</param>
         public Matrix(uint rows, uint cols)
         {
-            matrix = new float[rows][];
+            matrix = new double[rows][];
 
             for (int i = 0; i < rows; i++)
-                matrix[i] = new float[cols];
+                matrix[i] = new double[cols];
             
             M = rows;
             N = cols;
@@ -104,7 +104,7 @@ namespace ACDC_Control.Math.Types
                 throw new ArgumentException("Matrix multiplication dimension error. a.N (rows) must equal b.M (columns)");
 
             Matrix resultant = new Matrix(a.M, b.N);
-            float sum;
+            double sum;
 
             for (uint i = 0; i < a.M; i++)
             {
@@ -123,23 +123,23 @@ namespace ACDC_Control.Math.Types
         }
 
         /// <summary>
-        /// Muliply a matrix float by a matrix.
+        /// Muliply a matrix double by a matrix.
         /// </summary>
         /// <param name="s"></param>
         /// <param name="a"></param>
         /// <returns></returns>
-        public static Matrix operator *(float s, Matrix a)
+        public static Matrix operator *(double s, Matrix a)
         {
             return a * s;
         }
 
         /// <summary>
-        /// Muliply a matrix by a regular float.
+        /// Muliply a matrix by a regular double.
         /// </summary>
         /// <param name="a"></param>
         /// <param name="s"></param>
         /// <returns></returns>
-        public static Matrix operator *(Matrix a, float s)
+        public static Matrix operator *(Matrix a, double s)
         {
             Matrix resultant = new Matrix(a.M, a.N);
 

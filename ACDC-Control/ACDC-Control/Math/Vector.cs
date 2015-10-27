@@ -12,7 +12,7 @@ namespace ACDC_Control.Math.Types
         public static readonly Vector Y_Axis = new Vector(0, 1, 0);
         public static readonly Vector Z_Axis = new Vector(0, 0, 1);
 
-        private float[] v;
+        private double[] v;
 
         #region Properties
 
@@ -21,7 +21,7 @@ namespace ACDC_Control.Math.Types
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public float this[int key]
+        public double this[int key]
         {
             get { return v[key]; }
         }
@@ -29,7 +29,7 @@ namespace ACDC_Control.Math.Types
         /// <summary>
         /// 
         /// </summary>
-        public float X
+        public double X
         {
             get { return v[0]; }
             set { v[0] = value; }
@@ -38,7 +38,7 @@ namespace ACDC_Control.Math.Types
         /// <summary>
         /// 
         /// </summary>
-        public float Y
+        public double Y
         {
             get { return v[1]; }
             set { v[1] = value; }
@@ -47,7 +47,7 @@ namespace ACDC_Control.Math.Types
         /// <summary>
         /// 
         /// </summary>
-        public float Z
+        public double Z
         {
             get { return v[2]; }
             set { v[2] = value; }
@@ -56,7 +56,7 @@ namespace ACDC_Control.Math.Types
         /// <summary>
         /// 
         /// </summary>
-        public float Magnitude
+        public double Magnitude
         {
             get;
             private set;
@@ -70,10 +70,10 @@ namespace ACDC_Control.Math.Types
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="z"></param>
-        public Vector(float x = 0, float y = 0, float z = 0)
+        public Vector(double x = 0, double y = 0, double z = 0)
         {
-            v = new float[] { x, y, z };
-            Magnitude = (float)System.Math.Sqrt(x * x + y * y + z * z);
+            v = new double[] { x, y, z };
+            Magnitude = System.Math.Sqrt(x * x + y * y + z * z);
         }
 
         #region Operators
@@ -86,7 +86,7 @@ namespace ACDC_Control.Math.Types
         /// <returns></returns>
         public static Vector operator *(Vector u, Vector v)
         {
-            float x, y, z;
+            double x, y, z;
 
             x = u[1] * v[2] - u[2] * v[1];
             y = u[2] * v[0] - u[0] * v[2];
@@ -103,7 +103,7 @@ namespace ACDC_Control.Math.Types
         /// <returns></returns>
         public static Vector operator &(Vector u, Vector v)
         {
-            float x, y, z;
+            double x, y, z;
 
             x = u[1] * v[2] - u[2] * v[1];
             y = u[2] * v[0] - u[0] * v[2];
@@ -113,23 +113,23 @@ namespace ACDC_Control.Math.Types
         }
 
         /// <summary>
-        /// Muliply a regular float by a vector.
+        /// Muliply a regular double by a vector.
         /// </summary>
         /// <param name="s"></param>
         /// <param name="v"></param>
         /// <returns></returns>
-        public static Vector operator *(float s, Vector v)
+        public static Vector operator *(double s, Vector v)
         {
             return new Vector(v.X * s, v.Y * s, v.Z * s);
         }
 
         /// <summary>
-        /// Muliply a vector by a regular float.
+        /// Muliply a vector by a regular double.
         /// </summary>
         /// <param name="v"></param>
         /// <param name="s"></param>
         /// <returns></returns>
-        public static Vector operator *(Vector v, float s)
+        public static Vector operator *(Vector v, double s)
         {
             return new Vector(v.X * s, v.Y * s, v.Z * s);
         }
