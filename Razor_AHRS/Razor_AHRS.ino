@@ -167,7 +167,7 @@
 // OUTPUT OPTIONS
 /*****************************************************************/
 // Set your serial port baud rate used to send out data here!
-#define OUTPUT__BAUD_RATE 57600
+#define OUTPUT__BAUD_RATE 115200
 
 // Sensor data output interval in milliseconds
 // This may not work, if faster than 20ms (=50Hz)
@@ -178,6 +178,7 @@
 #define OUTPUT__MODE_CALIBRATE_SENSORS 0 // Outputs sensor min/max values as text for manual calibration
 #define OUTPUT__MODE_ANGLES 1 // Outputs yaw/pitch/roll in degrees
 #define OUTPUT__MODE_SENSORS_CALIB 2 // Outputs calibrated sensor values for all 9 axes
+#define OUTPUT__MODE_SENSORS_ANGLES_CALIB 5 // Outputs calibrated sensor values for all 9 axes and angles
 #define OUTPUT__MODE_SENSORS_RAW 3 // Outputs raw (uncalibrated) sensor values for all 9 axes
 #define OUTPUT__MODE_SENSORS_BOTH 4 // Outputs calibrated AND raw sensor values for all 9 axes
 // Output format definitions (do not change)
@@ -185,7 +186,7 @@
 #define OUTPUT__FORMAT_BINARY 1 // Outputs data as binary float
 
 // Select your startup output mode and format here!
-int output_mode = OUTPUT__MODE_SENSORS_CALIB;
+int output_mode = OUTPUT__MODE_SENSORS_ANGLES_CALIB;
 int output_format = OUTPUT__FORMAT_BINARY;
 
 // Select if serial continuous streaming output is enabled per default on startup.
@@ -647,6 +648,24 @@ void loop()
       Euler_angles();
       
       if (output_stream_on || output_single_on) output_angles();
+    }
+    else if (output_mode == OUTPUT__MODE_SENSORS_ANGLES_CALIB)
+    {
+      if (output_stream_on || output_single_on) 
+      {
+        // Apply sensor calibration
+        compensate_sensor_errors();
+      
+        // Run DCM algorithm
+        Compass_Heading(); // Calculate magnetic heading
+        Matrix_update();
+        Normalize();
+        Drift_correction();
+        Euler_angles();
+      
+        output_sensors();
+        output_angles();
+      }
     }
     else  // Output sensor values
     {      

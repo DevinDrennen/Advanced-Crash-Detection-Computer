@@ -129,5 +129,12 @@ void output_sensors()
       output_sensors_text('C');
     }
   }
+  else if (output_mode == OUTPUT__MODE_SENSORS_ANGLES_CALIB)
+  {
+    if (output_format == OUTPUT__FORMAT_BINARY)
+      output_sensors_binary();
+    else if (output_format == OUTPUT__FORMAT_TEXT)
+      output_sensors_text('R');
+  }
 }
 
