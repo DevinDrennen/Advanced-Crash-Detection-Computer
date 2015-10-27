@@ -8,16 +8,20 @@ using NetduinoGo;
 using SecretLabs.NETMF.Hardware.Netduino;
 using System.Net;
 using System.Threading;
+using System.IO;
+using System.Text;
 
 namespace ACDC_Control
 {
     public class Program
     {
         static Thread mainThread;
-        static RazorIMU imu;
+        static RazorIMU IMU;
         static OutputPort activityLED;
-        //static FileStream writer = new FileStream(csvPath, FileMode.Append);
-        static string csvPath = @"\SD\data.csv";
+
+        static FileStream writer;
+        static string csvPath = @"\SD\data_"; // base path
+        static byte[] buffer;
 
         public static void Main()
         {
@@ -29,6 +33,12 @@ namespace ACDC_Control
             while (NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress == IPAddress.Any.ToString())
                 Thread.Sleep(100);
             Debug.Print("NETDUINO 3 WIFI IP: " + NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress);
+
+            int i = 0;
+            while (File.Exists(csvPath + i + ".csv"))
+                i++;
+            csvPath += i + ".csv";
+            writer = new FileStream(csvPath, FileMode.Append);
 
             //ComplexNumTests();
             //VectorTests();
@@ -54,14 +64,18 @@ namespace ACDC_Control
             WebDisplay.Initialize();
 
             // Start reading data from the sensor and set up event to receive converted/pprocessed data.
-            imu = new RazorIMU(SerialPorts.COM1);
-            imu.StartReading();
-            imu.DataProcessed += Imu_DataProcessed;
+            IMU = new RazorIMU(SerialPorts.COM1, 115200);
+            IMU.StartReading();
+            IMU.DataProcessed += Imu_DataProcessed;
         }
 
         private static void Imu_DataProcessed()
         {
-             WebDisplay.FormatIMUDataString(imu.Data);
+            buffer = Encoding.UTF8.GetBytes(IMU.Data[9] + "," + IMU.Data[10] + "," + IMU.Data[11] + "\n");
+            WebDisplay.UpdateString(IMU.Data);
+
+            writer.Write(buffer, 0, buffer.Length);
+            writer.Flush();
         }
 
         /// <summary>

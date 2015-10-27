@@ -77,19 +77,23 @@ namespace ACDC_Control.WebServer
                     break;
                 case "/imuData":
                     lock (DataString)
+                    {
                         request.SendResponse(DataString);
+                    }
                     break;
                 default:
                     break;
             }
         }
 
-        public static void FormatIMUDataString(float[] data)
+        public static void UpdateString(float[] data)
         {
             lock (DataString)
-                DataString = "X: " + data[0] + "</br>" +
-                                "Y: " + data[1] + "</br>" +
-                                "Z: " + data[2] + "</br>";
+            {
+                DataString = "YAW:   " + (int)data[9] + "</br>" +
+                             "PITCH: " + (int)data[10] + "</br>" +
+                             "ROLL:  " + (int)data[11] + "</br>";
+            }
         }
     }
 }

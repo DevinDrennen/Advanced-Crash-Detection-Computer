@@ -1,3 +1,4 @@
+using Microsoft.SPOT;
 using System;
 using System.IO.Ports;
 using System.Threading;
@@ -11,7 +12,7 @@ namespace ACDC_Control.IMU
     /// </summary>
     public class RazorIMU
     {
-        const int BYTES_PER_FLOAT = 4, FLOATS_PER_TRANS = 9;
+        const int BYTES_PER_FLOAT = 4, FLOATS_PER_TRANS = 12;
 
         public event DataConverted DataProcessed = delegate { };
         private SerialPort razorIMU;
@@ -19,7 +20,7 @@ namespace ACDC_Control.IMU
 
         private byte[][] dataBytes;
         private byte[] syncBytes;
-        private float[] data, ypr;
+        private float[] _data;
 
         /// <summary>
         /// Indicates if communication has been initilized between the sensor and netduino.
@@ -32,16 +33,10 @@ namespace ACDC_Control.IMU
         /// </summary>
         public float[] Data
         {
-            get { return data; }
-            private set { data = value; }
+            get;
+            private set;
         }
-
-        public float[] YPR
-        {
-            get { return ypr; }
-            private set { ypr = value; }
-        }
-
+        
         /// <summary>
         /// Razor IMU object constructor. 
         /// </summary>
@@ -52,8 +47,8 @@ namespace ACDC_Control.IMU
             razorIMU = new SerialPort(port, baudRate);
             syncBytes = new byte[] { 127, 128, 0, 0 };
             dataBytes = new byte[FLOATS_PER_TRANS][];
-            data = new float[FLOATS_PER_TRANS];
-            ypr = new float[3];
+            _data = new float[FLOATS_PER_TRANS];
+            Data = _data;
 
             for (int i = 0; i < FLOATS_PER_TRANS; i++)
                 dataBytes[i] = new byte[BYTES_PER_FLOAT];
@@ -118,7 +113,7 @@ namespace ACDC_Control.IMU
                     }
                 }
 
-                /* This algorithm fills a 2d array of bytes by filling 9 rows of 4 bytes
+                /* This algorithm fills a 2d array of bytes by filling 12 rows of 4 bytes
                  * In other words, it is grouped such that each row contains the 4 bytes for a given float.
                 */
 
@@ -160,29 +155,32 @@ namespace ACDC_Control.IMU
              * and uses the pre-grouped bytes to get the floats.
              * It also converts the sensor values to euler angles.
             */
-
+                        
             // Acceleration
-            data[0] = BitConverter.ToSingle(dataBytes[0]);
-            data[1] = BitConverter.ToSingle(dataBytes[1]);
-            data[2] = BitConverter.ToSingle(dataBytes[2]);
+            _data[0] = BitConverter.ToSingle(dataBytes[0]);
+            _data[1] = BitConverter.ToSingle(dataBytes[1]);
+            _data[2] = BitConverter.ToSingle(dataBytes[2]);
 
             // Magnometer
-            data[3] = BitConverter.ToSingle(dataBytes[3]);
-            data[4] = BitConverter.ToSingle(dataBytes[4]);
-            data[5] = BitConverter.ToSingle(dataBytes[5]);
+            _data[3] = BitConverter.ToSingle(dataBytes[3]);
+            _data[4] = BitConverter.ToSingle(dataBytes[4]);
+            _data[5] = BitConverter.ToSingle(dataBytes[5]);
 
             // Gyroscope
-            data[6] = BitConverter.ToSingle(dataBytes[6]);
-            data[7] = BitConverter.ToSingle(dataBytes[7]);
-            data[8] = BitConverter.ToSingle(dataBytes[8]);
+            _data[6] = BitConverter.ToSingle(dataBytes[6]);
+            _data[7] = BitConverter.ToSingle(dataBytes[7]);
+            _data[8] = BitConverter.ToSingle(dataBytes[8]);
 
-            // Calculate yaw, pitch, roll (ypr). ypr is in the form [yaw, pitch, roll]
-            ypr[0] = 0;
-            ypr[1] = 0;
-            ypr[2] = 0;
+            // yaw, pitch, roll
+            _data[9] = BitConverter.ToSingle(dataBytes[9]);
+            _data[10] = BitConverter.ToSingle(dataBytes[10]);
+            _data[11] = BitConverter.ToSingle(dataBytes[11]);
+
+            lock (Data)
+                Data = _data;
 
             // Fire the event, data convertion finished!
-            DataProcessed();
+            DataProcessed();            
         }
     }
 }
