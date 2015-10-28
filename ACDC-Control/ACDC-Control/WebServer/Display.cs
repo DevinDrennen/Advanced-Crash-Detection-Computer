@@ -1,11 +1,3 @@
-using System;
-using Microsoft.SPOT;
-using System.Net.Sockets;
-using System.Collections;
-using Microsoft.SPOT.Net.NetworkInformation;
-using System.Net;
-using System.Threading;
-
 namespace ACDC_Control.WebServer
 {
     /// <summary>
@@ -90,9 +82,9 @@ namespace ACDC_Control.WebServer
         {
             lock (DataString)
             {
-                DataString = "YAW:   " + (int)data[9] + "</br>" +
+                DataString = "YAW: " + (int)data[9] + "</br>" +
                              "PITCH: " + (int)data[10] + "</br>" +
-                             "ROLL:  " + (int)data[11] + "</br>";
+                             "ROLL: " + (int)data[11];
             }
         }
     }

@@ -1,5 +1,3 @@
-using Microsoft.SPOT;
-using System;
 using System.IO.Ports;
 using System.Threading;
 
@@ -142,6 +140,7 @@ namespace ACDC_Control.IMU
 
                 // Grid filled, convert bytes to floats!
                 convertData();
+                razorIMU.DiscardInBuffer();
             }
         }
 
