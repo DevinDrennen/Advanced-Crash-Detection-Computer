@@ -18,7 +18,7 @@ namespace ACDC_Control
 
         static RazorIMU IMU;
         static OutputPort activityLED;
-        static InterruptPort usrButton = new InterruptPort(Pins.ONBOARD_BTN, true, Port.ResistorMode.PullDown, Port.InterruptMode.InterruptEdgeHigh);
+        static InterruptPort usrButton = new InterruptPort(Pins.GPIO_PIN_D8, true, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeLow);
 
         static FileStream writer;
         static string csvPath = @"\SD\data_"; // base path
@@ -30,12 +30,7 @@ namespace ACDC_Control
             mainThread = Thread.CurrentThread;
 
             activityLED = new OutputPort(Pins.ONBOARD_LED, false);
-
-            // Wait for internet connectivity then print the IP address of the netduino
-            while (NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress == IPAddress.Any.ToString())
-                Thread.Sleep(100);
-            Debug.Print("NETDUINO 3 WIFI IP: " + NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress);
-
+            
             if (enableLogging)
             {
                 int i = 0;
@@ -69,14 +64,19 @@ namespace ACDC_Control
         /// </summary>
         private static void InitializeACDC()
         {
-            // Start the web display
-            WebDisplay.Initialize();
-
             // Start reading data from the sensor and set up event to receive converted/pprocessed data.
             IMU = new RazorIMU(SerialPorts.COM1, 115200);
             IMU.StartReading();
             IMU.DataProcessed += Imu_DataProcessed;
             usrButton.OnInterrupt += new NativeEventHandler(UsrButton_OnInterrupt);
+
+            // Wait for internet connectivity then print the IP address of the netduino
+            while (NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress == IPAddress.Any.ToString())
+                Thread.Sleep(100);
+            Debug.Print("NETDUINO 3 WIFI IP: " + NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress);
+
+            // Start the web display
+            WebDisplay.Initialize();
         }
 
         private static void UsrButton_OnInterrupt(uint data1, uint data2, System.DateTime time)
@@ -94,7 +94,8 @@ namespace ACDC_Control
         /// </summary>
         private static void Imu_DataProcessed()
         {
-            WebDisplay.UpdateString(IMU.Data);
+            if (WebDisplay.Initialized)
+                WebDisplay.UpdateString(IMU.Data);
 
             if (enableLogging)
             {

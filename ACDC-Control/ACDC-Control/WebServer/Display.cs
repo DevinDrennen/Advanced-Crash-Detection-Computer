@@ -21,6 +21,11 @@ namespace ACDC_Control.WebServer
         public static string DataString { get; private set; }
 
         /// <summary>
+        /// Boolean signifying if the web display is initialized
+        /// </summary>
+        public static bool Initialized { get; private set; }
+
+        /// <summary>
         /// Begin the web display so web responses are answered with the webpage
         /// </summary>
         /// <param name="port">The port on which we will accept a connection to the web display</param>
@@ -41,6 +46,7 @@ namespace ACDC_Control.WebServer
             // Also set up the event to be triggered when a request is received.
             webListener = new Listener(port);
             webListener.ReceivedRequest += WebListener_ReceivedRequest;
+            Initialized = true;
         }
 
         /// <summary>
