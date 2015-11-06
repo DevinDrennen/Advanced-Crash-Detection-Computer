@@ -26,4 +26,4 @@ There is a snippet of code intended to solve issues with the SDK and VS 2015, ho
 
 Here is the way things fit into the case. A phone is shown with the website served by the netduino.
 
-![Microcontroller and sensor](/Photos/hardware.png?raw=true)
+![Microcontroller and sensor](/Photos/collection.png?raw=true)
