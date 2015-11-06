@@ -59,7 +59,4 @@
     <Reference Include="GoBus" />
     <Reference Include="System.IO" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
-  </ItemGroup>
 </Project>
