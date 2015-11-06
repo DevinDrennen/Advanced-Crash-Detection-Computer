@@ -18,6 +18,12 @@ There is a snippet of code intended to solve issues with the SDK and VS 2015, ho
   * Maybe emmit emergency RF signal
 
 **Hardware:**
-![R GPX Analysis GUI](/Photos/hardware.png?raw=true)
 * [Netduino 3 WiFi](http://www.netduino.com/netduino3wifi/specs.htm)
 * [Razor IMU](https://www.sparkfun.com/products/10736)
+
+![Microcontroller and sensor](/Photos/hardware.png?raw=true)
+
+
+Here is the way things fit into the case. A phone is shown with the website served by the netduino.
+
+![Microcontroller and sensor](/Photos/hardware.png?raw=true)
