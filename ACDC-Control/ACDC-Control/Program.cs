@@ -54,7 +54,7 @@ namespace ACDC_Control
             // flashing the on board led to let us know code hasn't crashed
             while (true)
             {
-                activityLED.Write(!activityLED.Read());
+                activityLED.Write(!activityLED.Read() && enableLogging);
                 Thread.Sleep(10);
             }
         }
@@ -68,7 +68,6 @@ namespace ACDC_Control
             IMU = new RazorIMU(SerialPorts.COM1, 115200);
             IMU.StartReading();
             IMU.DataProcessed += Imu_DataProcessed;
-            usrButton.OnInterrupt += new NativeEventHandler(UsrButton_OnInterrupt);
 
             // Wait for internet connectivity then print the IP address of the netduino
             while (NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress == IPAddress.Any.ToString())
@@ -78,24 +77,14 @@ namespace ACDC_Control
             // Start the web display
             WebDisplay.Initialize();
         }
-
-        private static void UsrButton_OnInterrupt(uint data1, uint data2, System.DateTime time)
-        {
-            lock (writer)
-            {
-                writer.Flush();
-                writer.Close();
-                enableLogging = false;
-            }
-        }
-        
+                
         /// <summary>
         /// 
         /// </summary>
         private static void Imu_DataProcessed()
         {
             if (WebDisplay.Initialized)
-                WebDisplay.UpdateString(IMU.Data);
+                WebDisplay.UpdateString(IMU.Data, enableLogging, csvPath);
 
             if (enableLogging)
             {
@@ -109,17 +98,18 @@ namespace ACDC_Control
                     IMU.Data[6] + "," +
                     IMU.Data[7] + "," +
                     IMU.Data[8] + ",," +
-                    IMU.Data[9] + "," + 
-                    IMU.Data[10] + "," + 
+                    IMU.Data[9] + "," +
+                    IMU.Data[10] + "," +
                     IMU.Data[11] + "\n");
-                
-                lock(writer)
+
+                writer.Write(buffer, 0, buffer.Length);
+                writer.Flush();
+
+                if (!usrButton.Read())
                 {
-                    if (writer.CanWrite)
-                    {
-                        writer.Write(buffer, 0, buffer.Length);
-                        writer.Flush();
-                    }
+                    writer.Close();
+                    writer.Dispose();
+                    enableLogging = false;
                 }
             }
         }

@@ -18,8 +18,8 @@ namespace ACDC_Control.WebServer
         /// <summary>
         /// One of the strings to test the displaying of data
         /// </summary>
-        public static string DataString { get; private set; }
-
+        public static string ACDC_Status { get; private set; }
+        
         /// <summary>
         /// Boolean signifying if the web display is initialized
         /// </summary>
@@ -32,12 +32,12 @@ namespace ACDC_Control.WebServer
         public static void Initialize(int port = 80, int updatePeriod = 200)
         {
             // Set up some needed strings before allowing web resqests!
-            DataString = ""; 
+            ACDC_Status = "";
             jQScript = "<script>" +
-                            "setInterval(function(){ imuDataUpdate() }, " + updatePeriod + ");" +
-                            "function imuDataUpdate(){" +
-                                "$.get(\"imuData\", function(data, status){" +
-                                    "document.getElementById(\"imuDataText\").innerHTML = data;" +
+                            "setInterval(function(){ updateStatus() }, " + updatePeriod + ");" +
+                            "function updateStatus(){" +
+                                "$.get(\"acdcStatus\", function(data, status){" +
+                                    "document.getElementById(\"acdcStatus\").innerHTML = data;" +
                                 "});" +
                             "}" +
                         "</script>";
@@ -64,19 +64,18 @@ namespace ACDC_Control.WebServer
                         "<html>" +
                         "<head>" +
                         "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js\"></script>" +
-                        "<title>ACDC</title>" +
+                        "<title>ACDC Status</title>" +
                         "</head>" +
-                        "<h2>IMU Acceleration:</h2>" +
-                        "<p id=\"imuDataText\" style=\"margin - bottom:0px; font - family: 'Courier New', Courier, monospace\" ></p>" +
+                        "<div id=\"acdcStatus\" style=\"margin - bottom:0px; font - family: 'Courier New', Courier, monospace\" ></div>" +
                         jQScript +
                         "</body>" +
                         "</html>"
                         );
                     break;
-                case "/imuData":
-                    lock (DataString)
+                case "/acdcStatus":
+                    lock (ACDC_Status)
                     {
-                        request.SendResponse(DataString);
+                        request.SendResponse(ACDC_Status);
                     }
                     break;
                 default:
@@ -84,13 +83,19 @@ namespace ACDC_Control.WebServer
             }
         }
 
-        public static void UpdateString(double[] data)
+        public static void UpdateString(double[] data, bool loggingEnabled, string logFile)
         {
-            lock (DataString)
+            lock (ACDC_Status)
             {
-                DataString = "YAW: " + (int)data[9] + "</br>" +
-                             "PITCH: " + (int)data[10] + "</br>" +
-                             "ROLL: " + (int)data[11];
+                if(loggingEnabled)
+                    ACDC_Status = "<p> <h3>Recordinng:</h3> " + logFile + "</p>";
+                else
+                    ACDC_Status = "<p> <h3>Saved to:</h3> " + logFile + "</p>";
+
+                ACDC_Status += "<p> <h3>Sensor Data:</h3> </br>";
+                ACDC_Status +=  "YAW: " + (int)data[9] + "</br>" +
+                                "PITCH: " + (int)data[10] + "</br>" +
+                                "ROLL: " + (int)data[11] + "</p>";
             }
         }
     }
