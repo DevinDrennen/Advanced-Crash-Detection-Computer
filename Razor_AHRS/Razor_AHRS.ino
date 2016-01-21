@@ -186,8 +186,8 @@
 #define OUTPUT__FORMAT_BINARY 1 // Outputs data as binary float
 
 // Select your startup output mode and format here!
-int output_mode = OUTPUT__MODE_SENSORS_ANGLES_CALIB;
-int output_format = OUTPUT__FORMAT_BINARY;
+int output_mode = OUTPUT__MODE_CALIBRATE_SENSORS;
+int output_format = OUTPUT__FORMAT_TEXT;
 
 // Select if serial continuous streaming output is enabled per default on startup.
 #define OUTPUT__STARTUP_STREAM_ON true  // true or false
