@@ -186,8 +186,8 @@
 #define OUTPUT__FORMAT_BINARY 1 // Outputs data as binary float
 
 // Select your startup output mode and format here!
-int output_mode = OUTPUT__MODE_CALIBRATE_SENSORS;
-int output_format = OUTPUT__FORMAT_TEXT;
+int output_mode = OUTPUT__MODE_SENSORS_ANGLES_CALIB;
+int output_format = OUTPUT__FORMAT_BINARY;
 
 // Select if serial continuous streaming output is enabled per default on startup.
 #define OUTPUT__STARTUP_STREAM_ON true  // true or false
@@ -214,12 +214,12 @@ boolean output_errors = false;  // true or false
 // Put MIN/MAX and OFFSET readings for your board here!
 // Accelerometer
 // "accel x,y,z (min/max) = X_MIN/X_MAX  Y_MIN/Y_MAX  Z_MIN/Z_MAX"
-#define ACCEL_X_MIN ((float) -259)
-#define ACCEL_X_MAX ((float) 258)
-#define ACCEL_Y_MIN ((float) -270)
-#define ACCEL_Y_MAX ((float) 251)
-#define ACCEL_Z_MIN ((float) -260)
-#define ACCEL_Z_MAX ((float) 254)
+#define ACCEL_X_MIN ((float) -35)
+#define ACCEL_X_MAX ((float) 32)
+#define ACCEL_Y_MIN ((float) -34)
+#define ACCEL_Y_MAX ((float) 31)
+#define ACCEL_Z_MIN ((float) -33)
+#define ACCEL_Z_MAX ((float) 31)
 
 // Magnetometer (standard calibration mode)
 // "magn x,y,z (min/max) = X_MIN/X_MAX  Y_MIN/Y_MAX  Z_MIN/Z_MAX"
