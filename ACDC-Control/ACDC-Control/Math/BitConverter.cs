@@ -1,7 +1,7 @@
 using System;
 using Microsoft.SPOT;
 
-namespace ACDC_Control
+namespace ACDC_Control.Math
 {
     /// <summary>
     /// <para>Class used to convert from various types to others.</para>

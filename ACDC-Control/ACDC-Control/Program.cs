@@ -25,6 +25,8 @@ namespace ACDC_Control
         static byte[] buffer;
         static bool enableLogging = true;
 
+        static string status;
+
         public static void Main()
         {
             mainThread = Thread.CurrentThread;
@@ -54,7 +56,7 @@ namespace ACDC_Control
             // flashing the on board led to let us know code hasn't crashed
             while (true)
             {
-                activityLED.Write(!activityLED.Read() && enableLogging);
+                activityLED.Write(!activityLED.Read());
                 Thread.Sleep(10);
             }
         }
@@ -83,8 +85,15 @@ namespace ACDC_Control
         /// </summary>
         private static void Imu_DataProcessed()
         {
+            if (IMU.Data[2] > 512)
+                status = "Left Side Impact of " + IMU.Data[2] / 256;
+            else if (IMU.Data[2] < -512)
+                status = "Right Side Impact of " + IMU.Data[2] / -256;
+            else
+                status = "No Crash";
+
             if (WebDisplay.Initialized)
-                WebDisplay.UpdateString(IMU.Data, enableLogging, csvPath);
+                WebDisplay.UpdateString(IMU.Data, enableLogging, csvPath, status);
 
             if (enableLogging)
             {
@@ -108,7 +117,6 @@ namespace ACDC_Control
                 if (!usrButton.Read())
                 {
                     writer.Close();
-                    writer.Dispose();
                     enableLogging = false;
                 }
             }

@@ -83,7 +83,7 @@ namespace ACDC_Control.WebServer
             }
         }
 
-        public static void UpdateString(double[] data, bool loggingEnabled, string logFile)
+        public static void UpdateString(double[] data, bool loggingEnabled, string logFile, string status)
         {
             lock (ACDC_Status)
             {
@@ -92,10 +92,12 @@ namespace ACDC_Control.WebServer
                 else
                     ACDC_Status = "<p> <h3>Saved to:</h3> " + logFile + "</p>";
 
+                ACDC_Status += "<p> <h3>Status:</h3> </br>" + status + "</p>";
+
                 ACDC_Status += "<p> <h3>Sensor Data:</h3> </br>";
-                ACDC_Status +=  "YAW: " + (int)data[9] + "</br>" +
-                                "PITCH: " + (int)data[10] + "</br>" +
-                                "ROLL: " + (int)data[11] + "</p>";
+                ACDC_Status +=  "A X: " + (int)data[0] + "</br>" +
+                                "A Y: " + (int)data[1] + "</br>" +
+                                "A Z: " + (int)data[2] + "</p>";
             }
         }
     }
