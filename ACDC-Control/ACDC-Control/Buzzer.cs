@@ -12,25 +12,28 @@ namespace ACDC_Control
 {
     static class Buzzer
     {
+        static int duration = 0;
         static PWM _pin = new PWM(PWMChannels.PWM_PIN_D10, 0, .5, false);
         /// <summary>
         /// The buzzer will buzz at frequency f for time t.
         /// </summary>
         /// <param name="f">Frequency, in hertz, the buzzer will buzz at.</param>
         /// <param name="t">How long, in seconds, the buzzer will buzz.</param>
-        static void buzz(int f, int t)
+        static void Buzz(int f, int t)
         {
             _pin.Frequency = (uint)f;
+            duration = t;
+            Thread doBuzz = new Thread(new ThreadStart(ThreadWorker));
 
-            Thread doBuzz = new Thread(new ThreadStart(_pin.Start));
-
-            doBuzz.Start();
-            Thread.Sleep(t * 1000);
-            _pin.Stop();
             doBuzz.Join();
             
         }
-
+        static void ThreadWorker()
+        {
+            _pin.Start();
+            Thread.Sleep(duration * 1000);
+            _pin.Stop();
+        }
     }
 }
 
