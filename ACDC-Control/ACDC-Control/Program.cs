@@ -76,6 +76,10 @@ namespace ACDC_Control
 
             // Start the web display
             WebDisplay.Initialize();
+
+            Buzzer.ReadyBuzz();
+            Thread.Sleep(1000);
+            Buzzer.AlertBuzz();
         }
                 
         /// <summary>
