@@ -28,6 +28,9 @@ namespace ACDC_Control
             doBuzz.Join();
             
         }
+        /// <summary>
+        /// Worker to start the buzzing.
+        /// </summary>
         static void ThreadWorker()
         {
             _pin.Start();
