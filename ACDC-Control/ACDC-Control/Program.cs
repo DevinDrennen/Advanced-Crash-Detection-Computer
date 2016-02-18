@@ -70,12 +70,14 @@ namespace ACDC_Control
             IMU.DataProcessed += Imu_DataProcessed;
 
             // Wait for internet connectivity then print the IP address of the netduino
-            while (NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress == IPAddress.Any.ToString())
-                Thread.Sleep(100);
+            //while (NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress == IPAddress.Any.ToString())
+            //    Thread.Sleep(100);
             Debug.Print("NETDUINO 3 WIFI IP: " + NetworkInterface.GetAllNetworkInterfaces()[0].IPAddress);
 
             // Start the web display
             WebDisplay.Initialize();
+
+            Buzzer.
 
             Buzzer.ReadyBuzz();
             Thread.Sleep(1000);
