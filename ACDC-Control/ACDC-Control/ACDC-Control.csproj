@@ -34,6 +34,7 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="Buzzer.cs" />
+    <Compile Include="GoLED.cs" />
     <Compile Include="Math\BitConverter.cs" />
     <Compile Include="BugFix.cs" />
     <Compile Include="Math\Matrix.cs" />
