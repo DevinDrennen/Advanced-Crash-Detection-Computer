@@ -19,7 +19,7 @@ namespace ACDC_Control
         /// <summary>
         /// Flashes a green light to let the user know the system is ready.
         /// </summary>
-        static void OnLight()
+        public static void OnLight()
         {
             Thread onFlash = new Thread(new ThreadStart(OnLightWorker));
             onFlash.Start();
@@ -39,7 +39,7 @@ namespace ACDC_Control
         /// <summary>
         /// When started, flashing becomes true and will continue to flash until flashing is set to false.
         /// </summary>
-        static void WarningLight()
+        public static void WarningLight()
         {
             Thread warningFlash = new Thread(new ThreadStart(WarningLightWorker));
             warningFlash.Start();
@@ -60,8 +60,8 @@ namespace ACDC_Control
             while (flashing)
             {
                 led.SetBrightness(1); //Light goes on for .25 seconds
-                Thread.Sleep(250);    //Then goes back off for .25 seconds
-                led.SetBrightness(0);
+                Thread.Sleep(250);    
+                led.SetBrightness(0); //Then goes back off for .25 seconds
                 Thread.Sleep(250);
             }
         }
